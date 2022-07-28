@@ -24,8 +24,8 @@ export class EventSchema {
   sourceContext!: EventSourceContextSchema;
 
   value!: EventValue;
-  linkedAssets!: [Asset];
-  linkedProduct!: [Product];
+  linkedAssets!: Asset[];
+  linkedProduct!: Product[];
 }
 
 export class RecordSchema {
