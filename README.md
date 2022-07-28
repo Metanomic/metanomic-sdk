@@ -14,7 +14,7 @@ The Metanomic SDK is available in the following languages:
 
 [Eventing Calaogue](http://eventcatalog.metanomic.net/) |
 [API & Data Definition Table](https://metanomic.notion.site/API-Data-Definition-Table-8ed6ccca46e14947be12606bd35d63a9) |
-[Thunderstruck Quick Start Guide - Beta](https://metanomic.notion.site/Thunderstruck-Quick-Start-Guide-Beta-356cc5016eff44278248474c96bd1fd1)
+[Thunderstruck Quick Start Guide - Beta](https://metanomic.notion.site/Thunderstruck-Quick-Start-Guide-Beta-356cc5016eff44278248474c96bd1fd1) |
 [Player Types Classifications](https://metanomic.notion.site/Player-Types-Classifications-6006ba06e078492aa7cf71b993de50a9) |
 [How to Report a Bug](https://metanomic.notion.site/How-to-Report-a-Bug-cf09338d050f4d31a5104bce9ee6024f) |
 [Feature Requests & Feedback](https://metanomic.notion.site/Feature-Requests-Feedback-10d78c47879744bc88554de9a067351f) |
