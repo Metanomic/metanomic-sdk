@@ -1,5 +1,7 @@
-import axios, { AxiosRequestConfig, AxiosInstance } from 'axios';
+import axios, { AxiosRequestConfig, AxiosInstance, } from 'axios';
 import * as rax from './retry';
+
+export { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 
 // Include this so `config.raxConfig` works easily.
 // See https://github.com/JustinBeckwith/retry-axios/issues/64.
@@ -9,7 +11,7 @@ declare module 'axios' {
   }
 }
 
-export const create = async (config?: AxiosRequestConfig<any>): Promise<AxiosInstance> => {
+export const create = (config?: AxiosRequestConfig<any>): AxiosInstance => {
   const thisAxios = axios.create(config);
   thisAxios.defaults.raxConfig = {
     instance: thisAxios,
