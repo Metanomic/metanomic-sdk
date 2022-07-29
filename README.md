@@ -24,6 +24,16 @@ The Metanomic SDK is available in the following languages:
 [Roadmap](https://github.com/aws/aws-cdk/blob/main/ROADMAP.md) |
 [More Resources](#more-resources)
 
+## The Metanomic Product
+
+### Thunderstruck
+
+![Thunderstruck](doc/tunderstruck-product.png?raw=true 'Thunderstruck')
+
+### The Economy Engine
+
+![The Economy Engine](doc/economy-architecture.png?raw=true 'The Economy Engine')
+
 ## Getting Started
 
 ### Register
