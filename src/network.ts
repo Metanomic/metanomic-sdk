@@ -25,7 +25,7 @@ export interface NetworkClientProps {
 /**
  * @summary The SDK client for the Network.
  */
-export default class NetworkClient {
+export class NetworkClient {
   public readonly apiUrl: string
   public readonly appId: string
   public readonly domainPaths: PATHS

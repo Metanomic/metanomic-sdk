@@ -6,7 +6,7 @@ export class AssetVariable {
   type!: VariableType;
   key!: string;
   value!: number;
-  variations!: [{
+  variations?: [{
     type: VariableVariationType;
     key: string;
     value: number;

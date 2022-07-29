@@ -1,3 +1,4 @@
+import { defer, debounce } from 'lodash'
 
 import { EVENTS_PER_PUSH, BUFFER_INTERVAL, BUFFER_TIME_GAP } from './util/config'
 import { EventSchema, RecordSchema } from './entities/event'
@@ -14,15 +15,18 @@ export interface NetBufferProps {
 export type Handler = (record: RecordSchema) => Promise<any>
 
 /**
- * @summary The NetBuffer Network scheduler.
+ * @summary The NetBuffer Network scheduler. A neat library that aggregates the submited messages,
+ *    and orchistrates a network-friendly emit.
  */
-export default class NetBuffer {
+export class NetBuffer {
   public readonly interval: number
   public readonly timeGap: number
   public readonly eventsPerPush: number
   public readonly appId: string
   public readonly handler: Handler
   private readonly eventStack: EventSchema[]
+  private readonly longDebounceTick: ReturnType<typeof debounce>
+  private readonly shortDebounceTick: ReturnType<typeof debounce>
 
   constructor(appId: string, handler: Handler, props?: NetBufferProps) {
     this.appId = appId
@@ -31,8 +35,19 @@ export default class NetBuffer {
     this.interval = props?.interval || BUFFER_INTERVAL
     this.timeGap = props?.timeGap || BUFFER_TIME_GAP
     this.eventStack = []
+    this.longDebounceTick = debounce(this.nextTick, this.interval, { leading: true, trailing: false })
+    this.shortDebounceTick = debounce(this.nextTick, this.timeGap, { leading: false, trailing: true })
+  }
 
-    this._loop(this.interval)
+  /**
+   * The method that makes the network transaction to communicate with the metanomic server
+   *
+   * @param event the event schema that encapsulates all the Events to send
+   * @returns number the number o item in the stack
+   */
+  stack(event: EventSchema): number {
+    defer(this.longDebounceTick)
+    return this.eventStack.push(event)
   }
 
   private _nextRecord(): RecordSchema {
@@ -50,24 +65,11 @@ export default class NetBuffer {
     } catch (_e) { }
 
     if (this.eventStack.length > 0) {
-      return this._loop(this.timeGap)
+      defer(this.shortDebounceTick)
     }
   }
 
-  private async _loop(interval: number) {
-    setTimeout(async () => {
-      await this.nextTick()
-      this._loop(interval)
-    }, interval)
-  }
-
-  /**
-   * The method that makes the network transaction to communicate with the metanomic server
-   *
-   * @param record the event record that encapsulates all the Events to send
-   * @returns number the number o item in the stack
-   */
-  stack(event: EventSchema): number {
-    return this.eventStack.push(event)
+  size(): number {
+    return this.eventStack.length
   }
 }
