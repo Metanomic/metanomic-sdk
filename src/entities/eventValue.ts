@@ -16,7 +16,7 @@ export class Content {
   term?: string;
   count?: number;
   uri?: string;
-  isIPFS: boolean = false
+  isIPFS?: boolean = false
 }
 
 export class Prize {

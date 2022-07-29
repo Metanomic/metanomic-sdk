@@ -48,7 +48,54 @@ npm install @metanomic/collector
 
 ### Example Usage
 
-TODO
+Reporting a new Player identity
+
+```typescript
+import { Metanomic } from '@methanomic/sdk';
+
+const metanomic = new Metanomic(APP_ID, API_KEY).withCampaign({
+  name: campaignName,
+});
+
+metanomic.identity({
+  identity: {
+    profileId,
+  },
+});
+```
+
+Reporting a new Achievement of a user, in a map area `map_area_id_123`, while executing the mission `mission_quest_2`, and winning a `12345_prize_id_890` prize
+
+```typescript
+import { Metanomic } from '@methanomic/sdk';
+
+const metanomic = new Metanomic(APP_ID, API_KEY)
+  .withMap({
+    id: 'map_area_id_123',
+    level: 10,
+    position: 12,
+  })
+  .withSession({
+    name: 'mission_quest_2',
+    difficulty: 3,
+    progress: 90,
+  });
+
+metanomic.achievement({
+  identity: {
+    profileId,
+  },
+  content: {
+    key: 'achievement_id',
+    term: 'Dragon Slayer',
+  },
+  prize: {
+    id: '12345_prize_id_890',
+    name: 'Dragon Slayer Achievement Prize',
+    isUnique: true,
+  },
+});
+```
 
 ### Configuration
 
