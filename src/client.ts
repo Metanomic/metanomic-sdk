@@ -19,10 +19,11 @@ import { NetBuffer } from './netbuffer'
  * @summary The properties for the MetanomicProps class.
  */
 export interface MetanomicProps {
-  readonly apiUrl: string
+  readonly apiUrl?: string
   readonly context?: EventSourceContextSchema
   readonly client?: NetworkClient
   readonly netBuffer?: NetBuffer
+  readonly logTraffic?: boolean
 }
 
 /**
@@ -49,10 +50,11 @@ export class Metanomic {
     this.context.app.build = BUILD
     this.context.app.namespace = NAMESPACE
 
-    this.client = props?.client || new NetworkClient(this.props.apiUrl, appId, {
+    this.client = props?.client || new NetworkClient(this.props?.apiUrl || BASE_API_URL, appId, {
       config: {
         headers: HEADERS({ API_KEY: apiKey })
-      }
+      },
+      logTraffic: props?.logTraffic
     })
 
     this.netBuffer = props?.netBuffer || new NetBuffer(this.appId, async (record) => this.client.sendRecord(record))

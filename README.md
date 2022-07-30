@@ -43,7 +43,7 @@ TODO
 ### Installation
 
 ```sh
-npm install @metanomic/collector
+npm install @metanomic/sdk
 ```
 
 ### Example Usage

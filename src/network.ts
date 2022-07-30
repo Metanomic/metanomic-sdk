@@ -20,6 +20,7 @@ export const DOMAIN_PATHS = (props: DOMAIN_PATHS_PROPS): PATHS => ({
 export interface NetworkClientProps {
   readonly instance?: AxiosInstance
   readonly config?: AxiosRequestConfig
+  readonly logTraffic?: boolean
 }
 
 /**
@@ -37,6 +38,18 @@ export class NetworkClient {
     this.domainPaths = DOMAIN_PATHS({ API_URL: this.apiUrl })
 
     this.client = props?.instance || create(props?.config)
+
+    if (props?.logTraffic) {
+      this.client.interceptors.request.use(request => {
+        console.log('Starting Request', JSON.stringify(request, null, 2))
+        return request
+      })
+
+      this.client.interceptors.response.use(response => {
+        console.log('Response:', JSON.stringify(response, null, 2))
+        return response
+      })
+    }
   }
 
   /**
