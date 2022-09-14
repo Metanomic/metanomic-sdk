@@ -1,0 +1,83 @@
+{
+  "name": "@metanomic/event-schemas",
+  "version": "0.1.0",
+  "license": "SEE LICENSE IN LICENSE",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "module": "dist/event-schemas.esm.js",
+  "author": "Metanomic Engineering <engineering@metanomic.net>",
+  "description": "The hassle-free way to integrate behavioural and game-economy insights into any virtual world application.",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=14"
+  },
+  "repository": {
+    "url": "https://github.com/metanomic/metanomic-sdk.git",
+    "type": "git"
+  },
+  "keywords": [
+    "sdk",
+    "gaming",
+    "games",
+    "analytcis",
+    "insights",
+    "metaverse",
+    "economy",
+    "eventing",
+    "inference",
+    "ai",
+    "artificial intelligence",
+    "metanomic-collector",
+    "metanomic-sdk",
+    "metanomic"
+  ],
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx test",
+    "lint": "tsdx lint",
+    "prepare": "tsdx build",
+    "size": "size-limit",
+    "analyze": "size-limit --why"
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "size-limit": [
+    {
+      "path": "dist/collector.cjs.production.min.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/collector.esm.js",
+      "limit": "10 KB"
+    }
+  ],
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^7.0.8",
+    "@types/lodash": "^4.14.182",
+    "@types/node": "^18.7.16",
+    "@types/sinon": "^10.0.13",
+    "@types/uuid": "^8.3.4",
+    "husky": "^8.0.1",
+    "nock": "^13.2.9",
+    "sinon": "^14.0.0",
+    "size-limit": "^7.0.8",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.4.0",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "jsonschema": "^1.4.1",
+    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
+    "uuid": "^8.3.2"
+  }
+}
