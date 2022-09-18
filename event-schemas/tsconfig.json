@@ -1,9 +1,11 @@
 {
   // see https://www.typescriptlang.org/tsconfig to better understand tsconfigs
-  "include": ["src", "types"],
+  "include": ["src", "types", "scripts"],
   "compilerOptions": {
-    "module": "esnext",
-    "lib": ["esnext"],
+    "module": "CommonJS",
+    "lib": ["es2015"],
+    "target": "es5",
+    "moduleResolution": "node",
     "importHelpers": true,
     // output .d.ts declaration files for consumers
     "declaration": true,
@@ -16,11 +18,11 @@
     // linter checks for common issues
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "preserveConstEnums": true,
     // noUnused* overlap with @typescript-eslint/no-unused-vars, can disable if duplicative
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     // use Node's module resolution algorithm, instead of the legacy TS one
-    "moduleResolution": "node",
     // transpile JSX to React.createElement
     "jsx": "react",
     // interop between ESM and CJS modules. Recommended by TS
@@ -30,6 +32,7 @@
     // error out if import and file system have a casing mismatch. Recommended by TS
     "forceConsistentCasingInFileNames": true,
     // `tsdx build` ignores this option, but it is commonly used when type-checking separately with `tsc`
-    "noEmit": true
+    "noEmit": true,
+    "types": ["node"]
   }
 }

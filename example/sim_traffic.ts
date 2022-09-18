@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { Metanomic } from '../src';
+import { Metanomic } from '../sdk/src';
 
 const TOTAL_PUSH = 100
 const APP_ID = process.env.METANOMIC_APP_ID!

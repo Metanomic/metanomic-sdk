@@ -4,6 +4,7 @@ import {
 
 export const IDRef: JsonSchema = {
   type: JsonSchemaType.STRING,
+  description: 'The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system'
 }
 
 export const StringRef: JsonSchema = {

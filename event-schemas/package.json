@@ -35,13 +35,18 @@
     "metanomic"
   ],
   "scripts": {
-    "start": "tsdx watch",
-    "build": "tsdx build",
-    "test": "tsdx test",
-    "lint": "tsdx lint",
-    "prepare": "tsdx build",
+    "build": "tsc",
+    "postinstall": "npm run build",
+    "prepare": "npm run build",
     "size": "size-limit",
-    "analyze": "size-limit --why"
+    "analyze": "size-limit --why",
+    "generate-json": "./scripts/generate-json.ts",
+    "generate-asyncapi": "./scripts/generate-asyncapi.ts",
+    "generate-py": "./scripts/generate-py.sh",
+    "generate-ts": "./scripts/generate-ts.sh",
+    "generate-golang": "./scripts/generate-golang.sh",
+    "generate-csharp": "./scripts/generate-csharp.sh",
+    "generate": "npm run generate-json && npm run generate-asyncapi && npm run generate-py && npm run generate-ts && npm run generate-golang && npm run generate-csharp"
   },
   "prettier": {
     "printWidth": 80,
@@ -61,11 +66,13 @@
   ],
   "devDependencies": {
     "@size-limit/preset-small-lib": "^7.0.8",
+    "@types/js-yaml": "^4.0.5",
     "@types/lodash": "^4.14.182",
     "@types/node": "^18.7.16",
     "@types/sinon": "^10.0.13",
     "@types/uuid": "^8.3.4",
     "husky": "^8.0.1",
+    "js-yaml": "^4.1.0",
     "nock": "^13.2.9",
     "sinon": "^14.0.0",
     "size-limit": "^7.0.8",

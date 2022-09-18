@@ -1,0 +1,1095 @@
+{
+  "title": "AppLifecycleEvent",
+  "type": "object",
+  "description": "AppLifecycleEvent Log record. The AppLifecycleEvent payload of the platform",
+  "required": [
+    "type",
+    "value",
+    "appId"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "title": "AppLifecycleEventType",
+      "description": "Event TypeDescribes the body of the AppLifecycleEventType",
+      "enum": [
+        "AppOpenedEvent",
+        "AppStart",
+        "AppRunning",
+        "AppStop",
+        "AppUpdate",
+        "AppInstall",
+        "GameStarted",
+        "GameEnded",
+        "GameRunning"
+      ],
+      "default": "AppOpenedEvent"
+    },
+    "version": {
+      "type": "string",
+      "description": "The Version reference type (Semver). The type that is used to refer to the eventing version",
+      "default": "$LATEST"
+    },
+    "eventId": {
+      "type": "string",
+      "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+    },
+    "appId": {
+      "type": "string",
+      "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+    },
+    "userId": {
+      "type": "string",
+      "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+    },
+    "installationId": {
+      "type": "string",
+      "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+    },
+    "playerId": {
+      "type": "string",
+      "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+    },
+    "sessionId": {
+      "type": "string",
+      "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+    },
+    "doTrack": {
+      "type": "boolean",
+      "default": true
+    },
+    "expiresAt": {
+      "type": "integer"
+    },
+    "receivedAt": {
+      "type": "integer"
+    },
+    "sentAt": {
+      "type": "integer"
+    },
+    "timestamp": {
+      "type": "integer"
+    },
+    "eventSinceAppstart": {
+      "type": "integer",
+      "default": 0,
+      "description": "event since app start, 0 if N/A"
+    },
+    "sourceContext": {
+      "title": "EventSourceContextSchema",
+      "type": "object",
+      "description": "Event Source Context record. The Meta Context of the Source for the Eventing payload origins",
+      "properties": {
+        "app": {
+          "title": "AppContext",
+          "type": "object",
+          "description": "The App Context. The App Specific Meta Context",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            },
+            "build": {
+              "type": "string"
+            },
+            "namespace": {
+              "type": "string"
+            }
+          }
+        },
+        "campaign": {
+          "title": "CampaignContext",
+          "type": "object",
+          "description": "The Campaign Context. The Campaign Specific Meta Context",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "affiliate": {
+              "type": "string"
+            },
+            "provider": {
+              "type": "string"
+            },
+            "source": {
+              "type": "string"
+            },
+            "medium": {
+              "type": "string"
+            },
+            "term": {
+              "type": "string"
+            },
+            "contentId": {
+              "type": "string"
+            },
+            "contentType": {
+              "type": "string"
+            },
+            "creativeUri": {
+              "type": "string"
+            },
+            "marketingTactic": {
+              "type": "string"
+            },
+            "group": {
+              "type": "string"
+            },
+            "uri": {
+              "type": "string"
+            },
+            "eCPM": {
+              "type": "number"
+            },
+            "idfv": {
+              "type": "string"
+            }
+          }
+        },
+        "device": {
+          "title": "DeviceContext",
+          "type": "object",
+          "description": "The Device Context. The Device Specific Meta Context",
+          "properties": {
+            "installationId": {
+              "type": "string",
+              "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+            },
+            "id": {
+              "type": "string",
+              "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+            },
+            "fullScreen": {
+              "type": "boolean"
+            },
+            "adTrackingEnabled": {
+              "type": "boolean"
+            },
+            "manufacturer": {
+              "type": "string"
+            },
+            "model": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "osName": {
+              "type": "string"
+            },
+            "osType": {
+              "type": "string"
+            },
+            "osVersion": {
+              "type": "string"
+            },
+            "jailbroken": {
+              "type": "boolean"
+            },
+            "token": {
+              "type": "string"
+            },
+            "ip": {
+              "type": "string"
+            },
+            "userAgent": {
+              "type": "string"
+            },
+            "engine": {
+              "type": "string"
+            },
+            "engineVersion": {
+              "type": "string"
+            },
+            "client": {
+              "type": "string"
+            },
+            "locale": {
+              "type": "string"
+            },
+            "bluetooth": {
+              "type": "boolean"
+            },
+            "carrier": {
+              "type": "string"
+            },
+            "cellular": {
+              "type": "boolean"
+            },
+            "wifi": {
+              "type": "boolean"
+            },
+            "screen": {
+              "title": "screen",
+              "type": "object",
+              "description": "The Device Screen. The Device Specific Screen properties",
+              "properties": {
+                "width": {
+                  "type": "number"
+                },
+                "height": {
+                  "type": "number"
+                },
+                "density": {
+                  "type": "number"
+                }
+              }
+            },
+            "location": {
+              "title": "location",
+              "type": "object",
+              "description": "The Device Location. The Device Location meta context",
+              "properties": {
+                "city": {
+                  "type": "string"
+                },
+                "country": {
+                  "type": "string"
+                },
+                "continent": {
+                  "type": "string"
+                },
+                "latitude": {
+                  "type": "number"
+                },
+                "longitude": {
+                  "type": "number"
+                },
+                "speed": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "source": {
+          "title": "SourceContext",
+          "type": "object",
+          "description": "The Source Context. The Eventing Source Meta Context",
+          "properties": {
+            "worldId": {
+              "type": "string",
+              "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+            },
+            "realmId": {
+              "type": "string",
+              "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+            },
+            "serverId": {
+              "type": "string",
+              "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+            },
+            "shardId": {
+              "type": "string",
+              "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+            },
+            "method": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "referrer": {
+              "type": "string"
+            },
+            "search": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            },
+            "environment": {
+              "type": "string"
+            }
+          }
+        },
+        "experiment": {
+          "title": "ExperimentContext",
+          "type": "object",
+          "description": "The Experiment Context. The Experiment Specific Meta Context",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+            },
+            "name": {
+              "type": "string"
+            },
+            "group": {
+              "type": "string"
+            },
+            "variation": {
+              "type": "string"
+            },
+            "uri": {
+              "type": "string"
+            }
+          }
+        },
+        "session": {
+          "title": "SessionContext",
+          "type": "object",
+          "description": "The Session Context. The Session Specific Meta Context that describes missions, challenges, levels and other session-based experiences",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+            },
+            "name": {
+              "type": "string"
+            },
+            "theme": {
+              "type": "string"
+            },
+            "genre": {
+              "type": "string"
+            },
+            "level": {
+              "type": "number"
+            },
+            "progress": {
+              "type": "number"
+            },
+            "difficulty": {
+              "type": "number"
+            }
+          }
+        },
+        "profile": {
+          "title": "ProfileContext",
+          "type": "object",
+          "description": "The Profile Context. The Profile Specific Meta Context that describes the in-game avatar/profile",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+            },
+            "name": {
+              "type": "string"
+            },
+            "xp": {
+              "type": "number"
+            },
+            "champion": {
+              "type": "string"
+            },
+            "skin": {
+              "type": "string"
+            },
+            "isPremium": {
+              "type": "boolean"
+            },
+            "class": {
+              "type": "string"
+            },
+            "subclass": {
+              "type": "string"
+            },
+            "race": {
+              "type": "string"
+            },
+            "mastery": {
+              "type": "string"
+            },
+            "groupId": {
+              "type": "string"
+            },
+            "guildId": {
+              "type": "string"
+            },
+            "teamId": {
+              "type": "string"
+            },
+            "partyId": {
+              "type": "string"
+            },
+            "factionId": {
+              "type": "string"
+            },
+            "channelId": {
+              "type": "string"
+            }
+          }
+        },
+        "targetProfile": {
+          "title": "ProfileContext",
+          "type": "object",
+          "description": "The Profile Context. The Profile Specific Meta Context that describes the in-game avatar/profile",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+            },
+            "name": {
+              "type": "string"
+            },
+            "xp": {
+              "type": "number"
+            },
+            "champion": {
+              "type": "string"
+            },
+            "skin": {
+              "type": "string"
+            },
+            "isPremium": {
+              "type": "boolean"
+            },
+            "class": {
+              "type": "string"
+            },
+            "subclass": {
+              "type": "string"
+            },
+            "race": {
+              "type": "string"
+            },
+            "mastery": {
+              "type": "string"
+            },
+            "groupId": {
+              "type": "string"
+            },
+            "guildId": {
+              "type": "string"
+            },
+            "teamId": {
+              "type": "string"
+            },
+            "partyId": {
+              "type": "string"
+            },
+            "factionId": {
+              "type": "string"
+            },
+            "channelId": {
+              "type": "string"
+            }
+          }
+        },
+        "map": {
+          "title": "MapContext",
+          "type": "object",
+          "description": "The Map Context. The Map Specific Meta Context that describes the in-game area and location",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+            },
+            "name": {
+              "type": "string"
+            },
+            "level": {
+              "type": "number"
+            },
+            "position": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "value": {
+      "title": "The Value payload",
+      "type": "object",
+      "description": "The Value Event class",
+      "properties": {
+        "identity": {
+          "title": "Identity",
+          "type": "object",
+          "description": "The identity Value Payload. All the values to keep track of the profile and user",
+          "required": [
+            "profileId",
+            "anonymous"
+          ],
+          "properties": {
+            "userId": {
+              "type": "string",
+              "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+            },
+            "profileId": {
+              "type": "string",
+              "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+            },
+            "wallet": {
+              "type": "string",
+              "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+            },
+            "anonymous": {
+              "type": "boolean",
+              "default": true
+            },
+            "username": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "plan": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "title": "Content",
+          "type": "object",
+          "description": "The Content Value Payload. All the values for content-based interactions",
+          "properties": {
+            "key": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "term": {
+              "type": "string"
+            },
+            "count": {
+              "type": "number"
+            },
+            "uri": {
+              "type": "string"
+            },
+            "isIPFS": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "linkedContent": {
+          "title": "Content",
+          "type": "object",
+          "description": "The Content Value Payload. All the values for content-based interactions",
+          "properties": {
+            "key": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "term": {
+              "type": "string"
+            },
+            "count": {
+              "type": "number"
+            },
+            "uri": {
+              "type": "string"
+            },
+            "isIPFS": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "prize": {
+          "title": "Prize",
+          "type": "object",
+          "description": "The prize/rewards Value Payload. All the values for prize/rewards-based interactions",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "value": {
+              "type": "number"
+            },
+            "level": {
+              "type": "number"
+            },
+            "amount": {
+              "type": "number"
+            },
+            "isUnique": {
+              "type": "boolean",
+              "default": true
+            },
+            "isItem": {
+              "type": "boolean",
+              "default": true
+            },
+            "isCurrency": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "gear": {
+          "title": "Gear",
+          "type": "object",
+          "description": "The gear Value Payload. All the values for gear-based acquisition interactions",
+          "properties": {
+            "level": {
+              "type": "number"
+            },
+            "value": {
+              "type": "number"
+            },
+            "class": {
+              "type": "string"
+            },
+            "isUnique": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "txType": {
+          "title": "TxType",
+          "type": "object",
+          "description": "The TransactionType. All the values to set what kind of transaction is it",
+          "properties": {
+            "isAchievementReward": {
+              "type": "boolean",
+              "default": true
+            },
+            "isRedeem": {
+              "type": "boolean",
+              "default": true
+            },
+            "isReward": {
+              "type": "boolean",
+              "default": true
+            },
+            "isAdReward": {
+              "type": "boolean",
+              "default": true
+            },
+            "isInappPurchase": {
+              "type": "boolean",
+              "default": true
+            },
+            "isRenewal": {
+              "type": "boolean",
+              "default": true
+            },
+            "isPurchase": {
+              "type": "boolean",
+              "default": true
+            },
+            "isFXTrade": {
+              "type": "boolean",
+              "default": true
+            },
+            "isSale": {
+              "type": "boolean",
+              "default": true
+            },
+            "isTrade": {
+              "type": "boolean",
+              "default": true
+            },
+            "isDrop": {
+              "type": "boolean",
+              "default": true
+            },
+            "isLoot": {
+              "type": "boolean",
+              "default": true
+            },
+            "isGained": {
+              "type": "boolean",
+              "default": true
+            },
+            "isContract": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "transaction": {
+          "title": "Transaction",
+          "type": "object",
+          "description": "The Transaction Payload. All the values for Transaction interactions",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "receipt": {
+              "type": "string"
+            },
+            "receiptSignature": {
+              "type": "string"
+            },
+            "transactorId": {
+              "type": "string"
+            },
+            "transactorName": {
+              "type": "string"
+            },
+            "transactorType": {
+              "type": "string"
+            },
+            "receiverId": {
+              "type": "string"
+            },
+            "receiverName": {
+              "type": "string"
+            },
+            "receiverType": {
+              "type": "string"
+            },
+            "network": {
+              "type": "string"
+            },
+            "checkoutId": {
+              "type": "string"
+            },
+            "orderId": {
+              "type": "string"
+            },
+            "storeId": {
+              "type": "string"
+            },
+            "storeSourceId": {
+              "type": "string"
+            },
+            "renewalCount": {
+              "type": "number",
+              "default": 0
+            },
+            "feesTotal": {
+              "type": "number"
+            },
+            "priceTotal": {
+              "type": "number"
+            },
+            "discountTotal": {
+              "type": "number"
+            },
+            "quantity": {
+              "type": "number"
+            },
+            "amount": {
+              "type": "number"
+            },
+            "currency": {
+              "type": "string"
+            },
+            "paymentMethod": {
+              "type": "string"
+            },
+            "paymentProvider": {
+              "type": "string"
+            },
+            "virtualAmount": {
+              "type": "number"
+            },
+            "virtualCurrency": {
+              "type": "string"
+            },
+            "virtualCurrencyType": {
+              "type": "string"
+            },
+            "blob": {
+              "type": "string"
+            }
+          }
+        },
+        "price": {
+          "title": "Price",
+          "type": "object",
+          "description": "The price Value Payload. All the values for price-based asking, listing & biding interactions",
+          "properties": {
+            "amount": {
+              "type": "number",
+              "description": "For either asking or bidding price"
+            },
+            "currency": {
+              "type": "string"
+            },
+            "currencyType": {
+              "type": "string"
+            }
+          }
+        },
+        "social": {
+          "title": "Social",
+          "type": "object",
+          "description": "The price Value Payload. All the values for price-based asking, listing & biding interactions",
+          "properties": {
+            "recipient": {
+              "type": "string"
+            },
+            "sender": {
+              "type": "string"
+            },
+            "groupName": {
+              "type": "string"
+            },
+            "via": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "rating": {
+              "type": "string"
+            }
+          }
+        },
+        "mission": {
+          "title": "Mission",
+          "type": "object",
+          "description": "The mission Value Payload. All the values for Mission/Quest/Level/Session/Matchmaking/Season interactions",
+          "properties": {
+            "duration": {
+              "type": "number"
+            },
+            "rank": {
+              "type": "number"
+            },
+            "rankName": {
+              "type": "string"
+            },
+            "score": {
+              "type": "number"
+            },
+            "moves": {
+              "type": "number"
+            },
+            "remaining": {
+              "type": "number"
+            }
+          }
+        },
+        "ad": {
+          "title": "Advertisement",
+          "type": "object",
+          "description": "The Ad Value Payload. All the values for Ad interactions",
+          "properties": {
+            "publisher": {
+              "type": "string"
+            },
+            "position": {
+              "type": "number"
+            },
+            "totalLength": {
+              "type": "number"
+            },
+            "quartile": {
+              "type": "number"
+            },
+            "placementId": {
+              "type": "string"
+            },
+            "placementName": {
+              "type": "string"
+            }
+          }
+        },
+        "customRef": {
+          "type": "string"
+        },
+        "customValue": {
+          "type": "number"
+        },
+        "customMeta": {
+          "type": "object"
+        }
+      }
+    },
+    "linkedAssets": {
+      "title": "linkedAssets",
+      "type": "array",
+      "description": "Event Linked Assets. The list of linked assets that are associated with this event",
+      "items": {
+        "title": "Asset",
+        "type": "object",
+        "description": "The Asset class describes the in-game item payload",
+        "required": [
+          "assetId",
+          "typeList"
+        ],
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+          },
+          "typeList": {
+            "title": "typeList",
+            "type": "array",
+            "description": "The list of types that the asset is associated with",
+            "minimum": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "title": "AssetType",
+              "description": "Asset Type Describes the type class of the asset",
+              "enum": [
+                "Resource",
+                "Item",
+                "Craft",
+                "Input",
+                "Modifier",
+                "Profile",
+                "Character"
+              ],
+              "default": "Resource"
+            }
+          },
+          "inputs": {
+            "title": "inputs",
+            "type": "array",
+            "description": "The list of asset ids that this asset depends to, in order to be produced",
+            "items": {
+              "type": "string",
+              "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+            }
+          },
+          "outputs": {
+            "title": "outputs",
+            "type": "array",
+            "description": "The list of asset ids that this asset can produce",
+            "items": {
+              "type": "string",
+              "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+            }
+          },
+          "classification": {
+            "title": "classification",
+            "type": "string",
+            "description": "Type, eg is Weapon, is Potion"
+          },
+          "categories": {
+            "title": "categories",
+            "type": "array",
+            "description": "eg 1. Melee, 2. Sword",
+            "items": {
+              "type": "string"
+            }
+          },
+          "variables": {
+            "title": "variables",
+            "type": "array",
+            "items": {
+              "title": "AssetVariable",
+              "type": "object",
+              "description": "The AssetVariable payload. The Asset Variable class describes the attribute of the Asset value",
+              "required": [
+                "type",
+                "key",
+                "value"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "title": "VariableType",
+                  "description": "Variable Type What kind of value the variable holds",
+                  "enum": [
+                    "Probability",
+                    "Quantity",
+                    "Quality",
+                    "Rate",
+                    "Number",
+                    "Percentage",
+                    "Time"
+                  ],
+                  "default": "Number"
+                },
+                "key": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "number"
+                },
+                "variations": {
+                  "title": "variations",
+                  "type": "array",
+                  "description": "The list of asset variations values",
+                  "items": {
+                    "title": "assetVariation",
+                    "type": "object",
+                    "description": "The Asset Variable Variation describes Whether this variable needs to be different based on a key condition",
+                    "required": [
+                      "type",
+                      "key",
+                      "value"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "title": "VariableVariationType",
+                        "description": "Variable Variation Type Whether this is a variation variable",
+                        "enum": [
+                          "Mapping",
+                          "Leveling",
+                          "Class",
+                          "Time",
+                          "Default"
+                        ],
+                        "default": "Default"
+                      },
+                      "key": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "linkedProduct": {
+      "title": "linkedProduct",
+      "type": "array",
+      "description": "Event Linked Product. The list of linked Product that are associated with this event",
+      "items": {
+        "title": "Product",
+        "type": "object",
+        "description": "The Product payload The Product class describes the linked product reference",
+        "required": [
+          "productId"
+        ],
+        "properties": {
+          "productId": {
+            "type": "string",
+            "description": "The ID (UUID) reference type, The type that is used to refer to an id of another instance in the system"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "variant": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "imageUri": {
+            "type": "string"
+          },
+          "uri": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

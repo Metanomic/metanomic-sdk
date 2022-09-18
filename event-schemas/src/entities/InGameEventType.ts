@@ -1,0 +1,32 @@
+
+
+enum InGameEventType {
+  ACHIEVEMENT = "Achievement",
+  LEVEL_UP = "LevelUp",
+  EXPERIENCE = "Experience",
+  WIN = "Win",
+  DRAW = "Draw",
+  DEFEAT = "Defeat",
+  KILL = "Kill",
+  KILLED = "Killed",
+  DROP = "Drop",
+  LOOT = "Loot",
+  HIGH_SCORE = "HighScore",
+  BUILD = "Build",
+  WAGING = "Waging",
+  LOCK = "Lock",
+  LOSE = "Lose",
+  SUPPLY = "Supply",
+  CRAFT = "Craft",
+  RESPAWN = "Respawn",
+  SPAWN = "Spawn",
+  GATHERING = "Gathering",
+  RESISTANCE = "Resistance",
+  GEAR = "Gear",
+  MAP_AREA_VISIT = "MapAreaVisit",
+  MAP_AREA_LEAVE = "MapAreaLeave",
+  SUMMON = "Summon",
+  CAST = "Cast",
+  EVOLVED = "Evolved",
+}
+export default InGameEventType;

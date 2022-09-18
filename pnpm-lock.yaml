@@ -11,12 +11,14 @@ importers:
   event-schemas:
     specifiers:
       '@size-limit/preset-small-lib': ^7.0.8
+      '@types/js-yaml': ^4.0.5
       '@types/lodash': ^4.14.182
       '@types/node': ^18.7.16
       '@types/sinon': ^10.0.13
       '@types/uuid': ^8.3.4
       axios: ^0.27.2
       husky: ^8.0.1
+      js-yaml: ^4.1.0
       jsonschema: ^1.4.1
       lodash: ^4.17.21
       lodash-es: ^4.17.21
@@ -35,11 +37,13 @@ importers:
       uuid: 8.3.2
     devDependencies:
       '@size-limit/preset-small-lib': 7.0.8_size-limit@7.0.8
+      '@types/js-yaml': 4.0.5
       '@types/lodash': 4.14.184
       '@types/node': 18.7.16
       '@types/sinon': 10.0.13
       '@types/uuid': 8.3.4
       husky: 8.0.1
+      js-yaml: 4.1.0
       nock: 13.2.9
       sinon: 14.0.0
       size-limit: 7.0.8
@@ -1762,6 +1766,10 @@ packages:
       pretty-format: 25.5.0
     dev: true
 
+  /@types/js-yaml/4.0.5:
+    resolution: {integrity: sha512-FhpRzf927MNQdRZP0J5DLIdTXhjLYzeUTmLAu69mnVksLH9CJY3IuSeEgbKUki7GQZm0WqDkGzyxju2EZGD2wA==}
+    dev: true
+
   /@types/json-schema/7.0.11:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
     dev: true
@@ -2021,6 +2029,10 @@ packages:
     resolution: {integrity: sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==}
     dependencies:
       sprintf-js: 1.0.3
+    dev: true
+
+  /argparse/2.0.1:
+    resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
     dev: true
 
   /aria-query/4.2.2:
@@ -4961,6 +4973,13 @@ packages:
     dependencies:
       argparse: 1.0.10
       esprima: 4.0.1
+    dev: true
+
+  /js-yaml/4.1.0:
+    resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
+    hasBin: true
+    dependencies:
+      argparse: 2.0.1
     dev: true
 
   /jsbn/0.1.1:
