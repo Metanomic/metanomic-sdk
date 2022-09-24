@@ -1,4 +1,4 @@
-import { RecordSchema } from './entities/event'
+import { RecordSchema } from './recordSchema'
 import { create, AxiosInstance, AxiosRequestConfig, AxiosResponse } from './util/axios'
 
 

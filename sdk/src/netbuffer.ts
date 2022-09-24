@@ -2,12 +2,9 @@ import { defer, debounce } from 'lodash'
 
 import { entities } from '@metanomic/event-schemas'
 
+import { RecordSchema } from './recordSchema'
 import { EVENTS_PER_PUSH, BUFFER_INTERVAL, BUFFER_TIME_GAP } from './util/config'
 
-export class RecordSchema {
-  appId!: string;
-  events!: entities.Event[];
-}
 
 /**
  * @summary The properties for the NetBufferProps class.
