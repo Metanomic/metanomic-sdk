@@ -1,5 +1,6 @@
 import nock from 'nock';
 import sinon from 'sinon';
+// import { describe, afterEach, it, expect } from '@jest/globals'
 import { Metanomic, entities } from '../src';
 
 const APP_ID = '5765508d-da83-4d5d-a4b3-03b2d529e951'
