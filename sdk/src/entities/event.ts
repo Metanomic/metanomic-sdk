@@ -28,8 +28,5 @@ export class EventSchema {
   linkedProduct?: Product[];
 }
 
-export class RecordSchema {
-  appId!: IDRef;
-  events!: EventSchema[];
-}
+
 

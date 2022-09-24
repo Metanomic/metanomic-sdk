@@ -1,16 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { EventSchema } from './entities/event'
-import { EventValue } from './entities/eventValue'
-import { Asset } from './entities/asset'
-import { Product } from './entities/product'
-import { EventType } from './entities/types'
+import { entities } from '@metanomic/event-schemas'
+
 import { VERSION, BUILD, NAMESPACE, BASE_API_URL } from './util/config'
-import {
-  AppContext, SessionContext, ProfileContext, MapContext,
-  CampaignContext, ExperimentContext, DeviceContext,
-  SourceContext, EventSourceContextSchema
-} from './entities/context'
 
 import { HEADERS, NetworkClient } from './network'
 import { NetBuffer } from './netbuffer'
@@ -20,7 +12,7 @@ import { NetBuffer } from './netbuffer'
  */
 export interface MetanomicProps {
   readonly apiUrl?: string
-  readonly context?: EventSourceContextSchema
+  readonly context?: entities.EventSourceContextSchema
   readonly client?: NetworkClient
   readonly netBuffer?: NetBuffer
   readonly logTraffic?: boolean
@@ -31,7 +23,7 @@ export interface MetanomicProps {
  */
 export class Metanomic {
   public readonly appId: string
-  public readonly context: EventSourceContextSchema
+  public readonly context: entities.EventSourceContextSchema
   public readonly client: NetworkClient
   public readonly netBuffer: NetBuffer
   readonly props: MetanomicProps
@@ -42,9 +34,9 @@ export class Metanomic {
       apiUrl: BASE_API_URL
     }, props || {})
 
-    this.context = props?.context || new EventSourceContextSchema()
+    this.context = props?.context || new entities.EventSourceContextSchema({})
 
-    this.context.app = new AppContext()
+    this.context.app = new entities.AppContext({})
     this.context.app.name = appId
     this.context.app.version = VERSION
     this.context.app.build = BUILD
@@ -66,7 +58,7 @@ export class Metanomic {
    *
    * @param event The event that's stacked and will be send to the analytics platform
    */
-  async send(event: EventSchema) {
+  async send(event: entities.Event) {
     const now = Date.now()
 
     event.sentAt = now
@@ -75,12 +67,14 @@ export class Metanomic {
     this.netBuffer.stack(event);
   }
 
-  newEvent(type: EventType, eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]): EventSchema {
-    const event = new EventSchema()
-    event.type = type
+  newEvent(type: entities.EventType, eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]): entities.Event {
+    const event = new entities.Event({
+      type: type,
+      appId: this.appId,
+      value: eventValue
+    })
     event.appId = this.appId
     event.eventId = uuidv4()
-    event.value = eventValue
     event.linkedAssets = linkedAssets || []
     event.linkedProduct = linkedProducts || []
     event.version = this.context?.app?.version
@@ -96,9 +90,9 @@ export class Metanomic {
    * @param campaign The properties for the CampaignContext class
    * @returns 
    */
-  withCampaign(campaign: CampaignContext): Metanomic {
+  withCampaign(campaign: entities.CampaignContext): Metanomic {
     const context = Object.assign({},
-      this.context ? this.context : new EventSourceContextSchema(),
+      this.context ? this.context : new entities.EventSourceContextSchema({}),
       { campaign }
     )
 
@@ -114,9 +108,9 @@ export class Metanomic {
    * @param device The properties for the DeviceContext class
    * @returns 
    */
-  withDevice(device: DeviceContext): Metanomic {
+  withDevice(device: entities.DeviceContext): Metanomic {
     const context = Object.assign({},
-      this.context ? this.context : new EventSourceContextSchema(),
+      this.context ? this.context : new entities.EventSourceContextSchema({}),
       { device }
     )
 
@@ -132,9 +126,9 @@ export class Metanomic {
    * @param source The properties for the SourceContext class
    * @returns 
    */
-  withSource(source: SourceContext): Metanomic {
+  withSource(source: entities.SourceContext): Metanomic {
     const context = Object.assign({},
-      this.context ? this.context : new EventSourceContextSchema(),
+      this.context ? this.context : new entities.EventSourceContextSchema({}),
       { source }
     )
 
@@ -150,9 +144,9 @@ export class Metanomic {
    * @param experiment The properties for the ExperimentContext class
    * @returns 
    */
-  withExperiment(experiment: ExperimentContext): Metanomic {
+  withExperiment(experiment: entities.ExperimentContext): Metanomic {
     const context = Object.assign({},
-      this.context ? this.context : new EventSourceContextSchema(),
+      this.context ? this.context : new entities.EventSourceContextSchema({}),
       { experiment }
     )
 
@@ -168,9 +162,9 @@ export class Metanomic {
    * @param session The properties for the SessionContext class
    * @returns 
    */
-  withSession(session: SessionContext): Metanomic {
+  withSession(session: entities.SessionContext): Metanomic {
     const context = Object.assign({},
-      this.context ? this.context : new EventSourceContextSchema(),
+      this.context ? this.context : new entities.EventSourceContextSchema({}),
       { session }
     )
 
@@ -186,9 +180,9 @@ export class Metanomic {
    * @param profile The properties for the ProfileContext class
    * @returns 
    */
-  withProfile(profile: ProfileContext): Metanomic {
+  withProfile(profile: entities.ProfileContext): Metanomic {
     const context = Object.assign({},
-      this.context ? this.context : new EventSourceContextSchema(),
+      this.context ? this.context : new entities.EventSourceContextSchema({}),
       { profile }
     )
 
@@ -204,9 +198,9 @@ export class Metanomic {
    * @param targetProfile The properties for the ProfileContext class
    * @returns 
    */
-  withTargetProfile(targetProfile: ProfileContext): Metanomic {
+  withTargetProfile(targetProfile: entities.ProfileContext): Metanomic {
     const context = Object.assign({},
-      this.context ? this.context : new EventSourceContextSchema(),
+      this.context ? this.context : new entities.EventSourceContextSchema({}),
       { targetProfile }
     )
 
@@ -222,9 +216,9 @@ export class Metanomic {
    * @param map The properties for the MapContext class
    * @returns 
    */
-  withMap(map: MapContext): Metanomic {
+  withMap(map: entities.MapContext): Metanomic {
     const context = Object.assign({},
-      this.context ? this.context : new EventSourceContextSchema(),
+      this.context ? this.context : new entities.EventSourceContextSchema({}),
       { map }
     )
 
@@ -243,8 +237,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async identity(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Identity
+  async identity(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.IDENTITY
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -254,8 +248,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async deviceInfo(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.DeviceInfo
+  async deviceInfo(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.DEVICE_INFO
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -265,8 +259,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async newUser(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.NewUser
+  async newUser(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.NEW_USER
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -276,8 +270,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async newPlayer(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.NewPlayer
+  async newPlayer(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.NEW_PLAYER
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -287,8 +281,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async DDNADontTrack(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.DDNADontTrack
+  async DDNADontTrack(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.DDNA_DONT_TRACK
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -298,8 +292,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async login(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Login
+  async login(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.LOGIN
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -309,8 +303,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async register(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Register
+  async register(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.REGISTER
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -320,8 +314,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async kYCPass(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.KYCPass
+  async kYCPass(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.KYC_PASS
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -331,8 +325,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async validated(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Validated
+  async validated(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.VALIDATED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -342,8 +336,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async alias(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Alias
+  async alias(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.ALIAS
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
 
@@ -355,8 +349,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async track(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Track
+  async track(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.TRACK
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -366,8 +360,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async action(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Action
+  async action(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.ACTION
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -377,8 +371,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async transaction(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Transaction
+  async transaction(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.TRANSACTION
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -388,8 +382,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async spread(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Spread
+  async spread(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SPREAD
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -399,8 +393,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async traffic(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Traffic
+  async traffic(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.TRAFFIC
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -410,8 +404,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async resource(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Resource
+  async resource(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.RESOURCE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -421,8 +415,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async error(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Error
+  async error(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.ERROR
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
 
@@ -434,8 +428,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async sinkFlow(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SinkFlow
+  async sinkFlow(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SINK_FLOW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -445,8 +439,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async sourceFlow(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SourceFlow
+  async sourceFlow(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SOURCE_FLOW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
 
@@ -458,8 +452,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async progressionStart(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.ProgressionStart
+  async progressionStart(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.PROGRESSION_START
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -469,8 +463,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async progressionComplete(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.ProgressionComplete
+  async progressionComplete(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.PROGRESSION_COMPLETE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -480,8 +474,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async progressionFail(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.ProgressionFail
+  async progressionFail(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.PROGRESSION_FAIL
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
 
@@ -493,8 +487,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async resourceSupply(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.ResourceSupply
+  async resourceSupply(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.RESOURCE_SUPPLY
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
 
@@ -506,8 +500,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async search(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Search
+  async search(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SEARCH
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -517,8 +511,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async bookmarked(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Bookmarked
+  async bookmarked(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.BOOKMARKED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -528,8 +522,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async reviewed(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Reviewed
+  async reviewed(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.REVIEWED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -539,8 +533,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async listing(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Listing
+  async listing(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.LISTING
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -550,8 +544,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async bid(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Bid
+  async bid(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.BID
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -561,8 +555,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async fulfillment(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Fulfillment
+  async fulfillment(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.FULFILLMENT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -572,8 +566,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async engagement(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Engagement
+  async engagement(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.ENGAGEMENT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -583,8 +577,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async access(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Access
+  async access(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.ACCESS
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -594,8 +588,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async click(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Click
+  async click(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CLICK
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -605,8 +599,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async view(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.View
+  async view(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.VIEW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -616,8 +610,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async acquire(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Acquire
+  async acquire(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.ACQUIRE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -627,8 +621,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async download(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Download
+  async download(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.DOWNLOAD
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -638,8 +632,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async grant(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Grant
+  async grant(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.GRANT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -649,8 +643,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async retrack(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Retrack
+  async retrack(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.RETRACK
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -660,8 +654,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async mint(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Mint
+  async mint(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MINT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -671,8 +665,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async burn(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Burn
+  async burn(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.BURN
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -682,8 +676,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async play(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Play
+  async play(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.PLAY
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -693,8 +687,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async pause(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Pause
+  async pause(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.PAUSE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -704,8 +698,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async skip(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Skip
+  async skip(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SKIP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -715,8 +709,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async resume(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Resume
+  async resume(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.RESUME
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -726,8 +720,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async volumeUp(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.VolumeUp
+  async volumeUp(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.VOLUME_UP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -737,8 +731,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async volumeDown(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.VolumeDown
+  async volumeDown(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.VOLUME_DOWN
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -748,8 +742,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async skipFwd(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SkipFwd
+  async skipFwd(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SKIP_FWD
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -759,8 +753,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async skipBwd(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SkipBwd
+  async skipBwd(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SKIP_BWD
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -770,8 +764,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async follow(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Follow
+  async follow(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.FOLLOW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -781,8 +775,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async unfollow(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Unfollow
+  async unfollow(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.UNFOLLOW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -792,8 +786,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async block(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Block
+  async block(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.BLOCK
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -803,8 +797,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async reply(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Reply
+  async reply(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.REPLY
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -814,8 +808,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async create(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Create
+  async create(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CREATE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -825,8 +819,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async like(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Like
+  async like(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.LIKE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -836,8 +830,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async spectate(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Spectate
+  async spectate(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SPECTATE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -847,8 +841,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async share(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Share
+  async share(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SHARE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -858,8 +852,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async scroll(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Scroll
+  async scroll(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SCROLL
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -869,8 +863,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async messageSent(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MessageSent
+  async messageSent(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MESSAGE_SENT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -880,8 +874,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async messageEngagement(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MessageEngagement
+  async messageEngagement(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MESSAGE_ENGAGEMENT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
 
@@ -893,8 +887,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async checkout(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Checkout
+  async checkout(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CHECKOUT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -904,8 +898,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async purchase(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Purchase
+  async purchase(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.PURCHASE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -915,8 +909,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async payment(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Payment
+  async payment(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.PAYMENT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -926,8 +920,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async order(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Order
+  async order(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.ORDER
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -937,8 +931,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async exchange(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Exchange
+  async exchange(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.EXCHANGE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -948,8 +942,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async subscription(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Subscription
+  async subscription(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SUBSCRIPTION
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -959,8 +953,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async revenueRecord(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.RevenueRecord
+  async revenueRecord(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.REVENUE_RECORD
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -970,8 +964,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async reward(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Reward
+  async reward(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.REWARD
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -981,8 +975,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async debit(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Debit
+  async debit(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.DEBIT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -992,8 +986,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async credit(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Credit
+  async credit(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CREDIT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1003,8 +997,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async subscriptionCancel(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SubscriptionCancel
+  async subscriptionCancel(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SUBSCRIPTION_CANCEL
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
 
@@ -1016,8 +1010,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async appOpenedEvent(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AppOpenedEvent
+  async appOpenedEvent(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.APP_OPENED_EVENT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1027,8 +1021,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async appStart(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AppStart
+  async appStart(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.APP_START
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1038,8 +1032,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async appRunning(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AppRunning
+  async appRunning(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.APP_RUNNING
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1049,8 +1043,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async appStop(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AppStop
+  async appStop(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.APP_STOP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1060,8 +1054,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async appUpdate(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AppUpdate
+  async appUpdate(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.APP_UPDATE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1071,8 +1065,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async appInstall(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AppInstall
+  async appInstall(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.APP_INSTALL
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1082,8 +1076,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async gameStarted(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.GameStarted
+  async gameStarted(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.GAME_STARTED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1093,8 +1087,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async gameEnded(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.GameEnded
+  async gameEnded(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.GAME_ENDED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1104,8 +1098,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async gameRunning(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.GameRunning
+  async gameRunning(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.GAME_RUNNING
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
 
@@ -1117,8 +1111,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async adStarted(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AdStarted
+  async adStarted(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.AD_STARTED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1128,8 +1122,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async adOpened(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AdOpened
+  async adOpened(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.AD_OPENED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1139,8 +1133,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async adPlaying(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AdPlaying
+  async adPlaying(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.AD_PLAYING
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1150,8 +1144,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async adStoped(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AdStoped
+  async adStoped(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.AD_STOPED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1161,8 +1155,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async adSkipped(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AdSkipped
+  async adSkipped(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.AD_SKIPPED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1172,8 +1166,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async conversion(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Conversion
+  async conversion(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CONVERSION
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1183,8 +1177,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async adCompleted(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AdCompleted
+  async adCompleted(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.AD_COMPLETED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1194,8 +1188,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async adStop(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AdStop
+  async adStop(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.AD_STOP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1205,8 +1199,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async adClosed(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AdClosed
+  async adClosed(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.AD_CLOSED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1216,8 +1210,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async adImpression(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AdImpression
+  async adImpression(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.AD_IMPRESSION
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1227,8 +1221,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async adExposure(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AdExposure
+  async adExposure(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.AD_EXPOSURE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1238,8 +1232,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async adReward(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.AdReward
+  async adReward(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.AD_REWARD
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
 
@@ -1251,8 +1245,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async campaignNew(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.CampaignNew
+  async campaignNew(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CAMPAIGN_NEW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1262,8 +1256,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async campaignStart(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.CampaignStart
+  async campaignStart(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CAMPAIGN_START
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1273,8 +1267,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async campaignStop(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.CampaignStop
+  async campaignStop(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CAMPAIGN_STOP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1284,8 +1278,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async campaignResult(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.CampaignResult
+  async campaignResult(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CAMPAIGN_RESULT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1295,8 +1289,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async campaignBounced(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.CampaignBounced
+  async campaignBounced(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CAMPAIGN_BOUNCED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
 
@@ -1308,8 +1302,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async achievement(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Achievement
+  async achievement(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.ACHIEVEMENT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1319,8 +1313,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async levelUp(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.LevelUp
+  async levelUp(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.LEVEL_UP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1330,8 +1324,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async experience(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Experience
+  async experience(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.EXPERIENCE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1341,8 +1335,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async win(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Win
+  async win(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.WIN
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1352,8 +1346,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async draw(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Draw
+  async draw(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.DRAW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1363,8 +1357,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async defeat(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Defeat
+  async defeat(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.DEFEAT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1374,8 +1368,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async kill(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Kill
+  async kill(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.KILL
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1385,8 +1379,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async killed(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Killed
+  async killed(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.KILLED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1396,8 +1390,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async drop(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Drop
+  async drop(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.DROP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1407,8 +1401,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async loot(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Loot
+  async loot(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.LOOT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1418,8 +1412,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async highScore(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.HighScore
+  async highScore(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.HIGH_SCORE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1429,8 +1423,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async build(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Build
+  async build(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.BUILD
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1440,8 +1434,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async waging(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Waging
+  async waging(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.WAGING
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1451,8 +1445,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async lock(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Lock
+  async lock(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.LOCK
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1462,8 +1456,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async lose(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Lose
+  async lose(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.LOSE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1473,8 +1467,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async supply(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Supply
+  async supply(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SUPPLY
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1484,8 +1478,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async craft(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Craft
+  async craft(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CRAFT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1495,8 +1489,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async respawn(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Respawn
+  async respawn(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.RESPAWN
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1506,8 +1500,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async spawn(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Spawn
+  async spawn(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SPAWN
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1517,8 +1511,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async gathering(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Gathering
+  async gathering(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.GATHERING
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1528,8 +1522,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async resistance(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Resistance
+  async resistance(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.RESISTANCE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1539,8 +1533,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async gear(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Gear
+  async gear(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.GEAR
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1550,8 +1544,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async mapAreaVisit(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MapAreaVisit
+  async mapAreaVisit(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MAP_AREA_VISIT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1561,8 +1555,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async mapAreaLeave(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MapAreaLeave
+  async mapAreaLeave(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MAP_AREA_LEAVE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1572,8 +1566,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async summon(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Summon
+  async summon(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SUMMON
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1583,8 +1577,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async cast(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Cast
+  async cast(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CAST
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1594,8 +1588,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async evolved(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Evolved
+  async evolved(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.EVOLVED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
 
@@ -1607,8 +1601,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async storeOpened(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.StoreOpened
+  async storeOpened(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.STORE_OPENED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1618,8 +1612,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async storeItemClick(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.StoreItemClick
+  async storeItemClick(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.STORE_ITEM_CLICK
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1629,8 +1623,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async itemAcquired(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.ItemAcquired
+  async itemAcquired(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.ITEM_ACQUIRED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1640,8 +1634,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async itemSpent(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.ItemSpent
+  async itemSpent(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.ITEM_SPENT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1651,8 +1645,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async championAcquired(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.ChampionAcquired
+  async championAcquired(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CHAMPION_ACQUIRED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1662,8 +1656,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async skinAcquired(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SkinAcquired
+  async skinAcquired(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SKIN_ACQUIRED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1673,8 +1667,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async variationAcquired(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.VariationAcquired
+  async variationAcquired(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.VARIATION_ACQUIRED
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
 
@@ -1686,8 +1680,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async sessionNew(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SessionNew
+  async sessionNew(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SESSION_NEW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1697,8 +1691,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async sessionStart(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SessionStart
+  async sessionStart(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SESSION_START
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1708,8 +1702,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async sessionStop(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SessionStop
+  async sessionStop(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SESSION_STOP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1719,8 +1713,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async sessionResult(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SessionResult
+  async sessionResult(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SESSION_RESULT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1730,8 +1724,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async sessionRank(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SessionRank
+  async sessionRank(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SESSION_RANK
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1741,8 +1735,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async sessionQuit(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SessionQuit
+  async sessionQuit(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SESSION_QUIT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1752,8 +1746,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async sessionFail(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SessionFail
+  async sessionFail(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SESSION_FAIL
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1763,8 +1757,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async sessionSkip(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SessionSkip
+  async sessionSkip(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SESSION_SKIP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1774,8 +1768,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async missionNew(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MissionNew
+  async missionNew(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MISSION_NEW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1785,8 +1779,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async missionStart(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MissionStart
+  async missionStart(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MISSION_START
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1796,8 +1790,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async missionStop(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MissionStop
+  async missionStop(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MISSION_STOP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1807,8 +1801,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async missionResult(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MissionResult
+  async missionResult(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MISSION_RESULT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1818,8 +1812,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async missionRank(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MissionRank
+  async missionRank(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MISSION_RANK
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1829,8 +1823,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async missionQuit(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MissionQuit
+  async missionQuit(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MISSION_QUIT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1840,8 +1834,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async missionFail(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MissionFail
+  async missionFail(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MISSION_FAIL
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1851,8 +1845,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async missionSkip(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MissionSkip
+  async missionSkip(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MISSION_SKIP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1862,8 +1856,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async questNew(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.QuestNew
+  async questNew(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.QUEST_NEW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1873,8 +1867,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async questStart(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.QuestStart
+  async questStart(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.QUEST_START
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1884,8 +1878,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async questStop(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.QuestStop
+  async questStop(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.QUEST_STOP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1895,8 +1889,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async questResult(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.QuestResult
+  async questResult(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.QUEST_RESULT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1906,8 +1900,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async questRank(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.QuestRank
+  async questRank(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.QUEST_RANK
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1917,8 +1911,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async questQuit(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.QuestQuit
+  async questQuit(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.QUEST_QUIT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1928,8 +1922,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async questFail(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.QuestFail
+  async questFail(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.QUEST_FAIL
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1939,8 +1933,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async questSkip(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.QuestSkip
+  async questSkip(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.QUEST_SKIP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1950,8 +1944,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async levelNew(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.LevelNew
+  async levelNew(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.LEVEL_NEW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1961,8 +1955,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async levelStart(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.LevelStart
+  async levelStart(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.LEVEL_START
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1972,8 +1966,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async levelStop(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.LevelStop
+  async levelStop(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.LEVEL_STOP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1983,8 +1977,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async levelResult(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.LevelResult
+  async levelResult(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.LEVEL_RESULT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -1994,8 +1988,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async levelRank(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.LevelRank
+  async levelRank(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.LEVEL_RANK
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2005,8 +1999,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async levelQuit(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.LevelQuit
+  async levelQuit(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.LEVEL_QUIT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2016,8 +2010,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async levelFail(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.LevelFail
+  async levelFail(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.LEVEL_FAIL
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2027,8 +2021,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async levelSkip(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.LevelSkip
+  async levelSkip(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.LEVEL_SKIP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2038,8 +2032,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async seasonNew(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SeasonNew
+  async seasonNew(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SEASON_NEW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2049,8 +2043,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async seasonStart(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SeasonStart
+  async seasonStart(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SEASON_START
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2060,8 +2054,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async seasonStop(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SeasonStop
+  async seasonStop(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SEASON_STOP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2071,8 +2065,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async seasonResult(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SeasonResult
+  async seasonResult(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SEASON_RESULT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2082,8 +2076,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async seasonRank(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SeasonRank
+  async seasonRank(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SEASON_RANK
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2093,8 +2087,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async seasonQuit(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SeasonQuit
+  async seasonQuit(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SEASON_QUIT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2104,8 +2098,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async seasonFail(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SeasonFail
+  async seasonFail(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SEASON_FAIL
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2115,8 +2109,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async seasonSkip(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.SeasonSkip
+  async seasonSkip(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.SEASON_SKIP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2126,8 +2120,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async matchmakingNew(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MatchmakingNew
+  async matchmakingNew(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MATCHMAKING_NEW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2137,8 +2131,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async matchmakingStart(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MatchmakingStart
+  async matchmakingStart(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MATCHMAKING_START
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2148,8 +2142,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async matchmakingStop(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MatchmakingStop
+  async matchmakingStop(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MATCHMAKING_STOP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2159,8 +2153,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async matchmakingResult(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MatchmakingResult
+  async matchmakingResult(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MATCHMAKING_RESULT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2170,8 +2164,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async matchmakingRank(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MatchmakingRank
+  async matchmakingRank(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MATCHMAKING_RANK
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2181,8 +2175,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async matchmakingQuit(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MatchmakingQuit
+  async matchmakingQuit(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MATCHMAKING_QUIT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2192,8 +2186,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async matchmakingFail(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MatchmakingFail
+  async matchmakingFail(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MATCHMAKING_FAIL
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2203,8 +2197,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async matchmakingSkip(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.MatchmakingSkip
+  async matchmakingSkip(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.MATCHMAKING_SKIP
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
 
@@ -2216,8 +2210,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async conversationNew(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.ConversationNew
+  async conversationNew(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CONVERSATION_NEW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2227,8 +2221,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async conversationJoin(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.ConversationJoin
+  async conversationJoin(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CONVERSATION_JOIN
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2238,8 +2232,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async conversationLeave(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.ConversationLeave
+  async conversationLeave(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CONVERSATION_LEAVE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2249,8 +2243,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async conversationMsgSent(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.ConversationMsgSent
+  async conversationMsgSent(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CONVERSATION_MSG_SENT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2260,8 +2254,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async channelNew(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.ChannelNew
+  async channelNew(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CHANNEL_NEW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2271,8 +2265,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async channelJoin(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.ChannelJoin
+  async channelJoin(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CHANNEL_JOIN
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2282,8 +2276,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async channelLeave(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.ChannelLeave
+  async channelLeave(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CHANNEL_LEAVE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2293,8 +2287,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async channelMsgSent(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.ChannelMsgSent
+  async channelMsgSent(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CHANNEL_MSG_SENT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2304,8 +2298,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async guildNew(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.GuildNew
+  async guildNew(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.GUILD_NEW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2315,8 +2309,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async guildJoin(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.GuildJoin
+  async guildJoin(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.GUILD_JOIN
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2326,8 +2320,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async guildLeave(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.GuildLeave
+  async guildLeave(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.GUILD_LEAVE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2337,8 +2331,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async guildMsgSent(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.GuildMsgSent
+  async guildMsgSent(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.GUILD_MSG_SENT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2348,8 +2342,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async groupNew(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.GroupNew
+  async groupNew(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.GROUP_NEW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2359,8 +2353,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async groupJoin(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.GroupJoin
+  async groupJoin(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.GROUP_JOIN
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2370,8 +2364,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async groupLeave(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.GroupLeave
+  async groupLeave(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.GROUP_LEAVE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2381,8 +2375,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async groupMsgSent(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.GroupMsgSent
+  async groupMsgSent(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.GROUP_MSG_SENT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2392,8 +2386,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async partyNew(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.PartyNew
+  async partyNew(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.PARTY_NEW
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2403,8 +2397,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async partyJoin(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.PartyJoin
+  async partyJoin(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.PARTY_JOIN
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2414,8 +2408,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async partyLeave(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.PartyLeave
+  async partyLeave(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.PARTY_LEAVE
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2425,8 +2419,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async partyMsgSent(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.PartyMsgSent
+  async partyMsgSent(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.PARTY_MSG_SENT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
 
@@ -2438,8 +2432,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async connect(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Connect
+  async connect(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.CONNECT
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2449,8 +2443,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async deploy(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Deploy
+  async deploy(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.DEPLOY
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
   /**
@@ -2460,8 +2454,8 @@ export class Metanomic {
    * @param linkedProducts In case there's a product listing relating to the event
    * @returns 
    */
-  async stream(eventValue: EventValue, linkedAssets?: Asset[], linkedProducts?: Product[]) {
-    const type = EventType.Stream
+  async stream(eventValue: entities.TheValuePayload, linkedAssets?: entities.Asset[], linkedProducts?: entities.Product[]) {
+    const type = entities.EventType.STREAM
     return this.send(this.newEvent(type, eventValue, linkedAssets, linkedProducts))
   }
 }

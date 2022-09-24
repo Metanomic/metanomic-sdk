@@ -1,7 +1,13 @@
 import { defer, debounce } from 'lodash'
 
+import { entities } from '@metanomic/event-schemas'
+
 import { EVENTS_PER_PUSH, BUFFER_INTERVAL, BUFFER_TIME_GAP } from './util/config'
-import { EventSchema, RecordSchema } from './entities/event'
+
+export class RecordSchema {
+  appId!: string;
+  events!: entities.Event[];
+}
 
 /**
  * @summary The properties for the NetBufferProps class.
@@ -24,7 +30,7 @@ export class NetBuffer {
   public readonly eventsPerPush: number
   public readonly appId: string
   public readonly handler: Handler
-  private readonly eventStack: EventSchema[]
+  private readonly eventStack: entities.Event[]
   private readonly longDebounceTick: ReturnType<typeof debounce>
   private readonly shortDebounceTick: ReturnType<typeof debounce>
 
@@ -45,7 +51,7 @@ export class NetBuffer {
    * @param event the event schema that encapsulates all the Events to send
    * @returns number the number o item in the stack
    */
-  stack(event: EventSchema): number {
+  stack(event: entities.Event): number {
     defer(this.longDebounceTick)
     return this.eventStack.push(event)
   }
