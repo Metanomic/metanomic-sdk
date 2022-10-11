@@ -1,16 +1,12 @@
 {
   "name": "@metanomic/event-schemas",
-  "version": "0.2.0",
+  "version": "0.7.0",
   "license": "SEE LICENSE IN LICENSE",
   "author": "Metanomic Engineering <engineering@metanomic.net>",
   "description": "The hassle-free way to integrate behavioural and game-economy insights into any virtual world application.",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
-  "module": "dist/event-schemas.esm.js",
-  "files": [
-    "dist",
-    "src"
-  ],
+  "module": "dist/json-schema.js",
   "engines": {
     "node": ">=14"
   },
@@ -35,12 +31,7 @@
     "metanomic"
   ],
   "scripts": {
-    "clean": "rimraf dist",
-    "prebuild": "npm run clean",
     "build": "tsc",
-    "preversion": "npm run build",
-    "postinstall": "npm run build",
-    "prepare": "npm run build",
     "size": "size-limit",
     "analyze": "size-limit --why",
     "generate-json": "./scripts/generate-json.ts",
